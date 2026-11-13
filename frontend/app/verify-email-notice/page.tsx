@@ -1,7 +1,8 @@
+
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/axios';
 import { Button } from '@/components/ui/button';
@@ -14,9 +15,9 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
-export default function VerifyEmailNoticePage() {
-  const router = useRouter();
+function VerifyEmailNoticeContent() {
   const searchParams = useSearchParams();
+
   const [email, setEmail] = useState('');
   const [isResending, setIsResending] = useState(false);
   const [resendStatus, setResendStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -25,7 +26,7 @@ export default function VerifyEmailNoticePage() {
   useEffect(() => {
     const emailParam = searchParams.get('email');
     if (emailParam) {
-      setEmail(decodeURIComponent(emailParam));
+      setEmail(emailParam);
     }
   }, [searchParams]);
 
@@ -37,7 +38,9 @@ export default function VerifyEmailNoticePage() {
     try {
       const response = await api.post('/email/verification-notification');
       setResendStatus('success');
-      setResendMessage(response.data.message || 'Verification email sent successfully');
+      setResendMessage(
+        response.data.message || 'Verification email sent successfully'
+      );
     } catch (error: any) {
       setResendStatus('error');
       setResendMessage(
@@ -59,6 +62,7 @@ export default function VerifyEmailNoticePage() {
             We've sent a verification link to your email address
           </CardDescription>
         </CardHeader>
+
         <CardContent className="space-y-4">
           <div className="text-center space-y-4">
             <div className="flex justify-center">
@@ -73,34 +77,40 @@ export default function VerifyEmailNoticePage() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2V7"
                   />
                 </svg>
               </div>
             </div>
+
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">
                 Please check your email inbox and click on the verification link to activate your account.
               </p>
+
               {email && (
                 <p className="text-sm font-medium">
                   Email sent to: <span className="text-primary">{email}</span>
                 </p>
               )}
             </div>
+
             <div className="pt-4 space-y-2">
               <p className="text-xs text-muted-foreground">
                 Didn't receive the email? Check your spam folder or click the button below to resend.
               </p>
+
               {resendStatus === 'success' && (
                 <p className="text-sm text-green-600">{resendMessage}</p>
               )}
+
               {resendStatus === 'error' && (
                 <p className="text-sm text-destructive">{resendMessage}</p>
               )}
             </div>
           </div>
         </CardContent>
+
         <CardFooter className="flex flex-col space-y-3">
           <Button
             onClick={handleResend}
@@ -111,10 +121,14 @@ export default function VerifyEmailNoticePage() {
           >
             {isResending ? 'Sending...' : 'Resend Verification Email'}
           </Button>
+
           <div className="text-center space-y-2">
             <p className="text-sm text-muted-foreground">
               Already verified?{' '}
-              <Link href="/login" className="text-primary hover:underline font-medium">
+              <Link
+                href="/login"
+                className="text-primary hover:underline font-medium"
+              >
                 Sign in
               </Link>
             </p>
@@ -125,3 +139,17 @@ export default function VerifyEmailNoticePage() {
   );
 }
 
+export default function VerifyEmailNoticePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        </div>
+      }
+    >
+      <VerifyEmailNoticeContent />
+    </Suspense>
+  );
+}
+  
