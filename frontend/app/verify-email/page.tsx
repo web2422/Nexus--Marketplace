@@ -44,7 +44,7 @@ function VerifyEmailContent() {
         setStatus('error');
         setMessage(
           error.response?.data?.message ||
-            'Failed to verify email. The link may have expired.'
+          'Failed to verify email. The link may have expired.'
         );
       }
     };
@@ -98,7 +98,6 @@ function VerifyEmailContent() {
               >
                 Go to Login
               </Button>
-
               <p className="text-xs text-center text-muted-foreground">
                 Your email has been verified. You can now sign in to your account.
               </p>
@@ -115,7 +114,6 @@ function VerifyEmailContent() {
               >
                 Back to Login
               </Button>
-
               <Link href="/register" className="text-sm text-primary hover:underline">
                 Create a new account
               </Link>
@@ -132,11 +130,13 @@ export default function VerifyEmailPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center bg-background">
-          <p className="text-muted-foreground">Loading email verification...</p>
+          <p className="text-muted-foreground">
+            Loading email verification...
+          </p>
         </div>
       }
     >
       <VerifyEmailContent />
     </Suspense>
   );
-            }
+    }
