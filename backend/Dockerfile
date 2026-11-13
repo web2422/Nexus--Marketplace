@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     pkg-config \
     libsqlite3-dev \
+    libpq-dev \
     libonig-dev \
     libicu-dev \
     libzip-dev \
@@ -23,6 +24,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         mbstring \
         opcache \
         pdo_mysql \
+        pdo_pgsql \
         pdo_sqlite \
         zip \
     && a2enmod rewrite headers \
@@ -34,10 +36,10 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Set application directory
 WORKDIR /var/www/html
 
-# Copy the Laravel application FIRST
+# Copy Laravel application
 COPY . .
 
-# Install PHP dependencies after artisan is available
+# Install PHP dependencies
 RUN composer install \
     --no-dev \
     --no-interaction \
