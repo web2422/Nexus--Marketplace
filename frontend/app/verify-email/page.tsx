@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/axios';
@@ -14,10 +15,10 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
-
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('');
 
@@ -36,12 +37,14 @@ export default function VerifyEmailPage() {
         const response = await api.get('/email/verify', {
           params: { id, hash },
         });
+
         setStatus('success');
         setMessage(response.data.message || 'Email verified successfully');
       } catch (error: any) {
         setStatus('error');
         setMessage(
-          error.response?.data?.message || 'Failed to verify email. The link may have expired.'
+          error.response?.data?.message ||
+            'Failed to verify email. The link may have expired.'
         );
       }
     };
@@ -62,18 +65,21 @@ export default function VerifyEmailPage() {
             {status === 'error' && 'Verification failed'}
           </CardDescription>
         </CardHeader>
+
         <CardContent className="space-y-4">
           {status === 'loading' && (
             <div className="flex justify-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
           )}
+
           {status === 'success' && (
             <div className="text-center space-y-4">
               <div className="text-green-600 text-lg">✓</div>
               <p className="text-sm text-muted-foreground">{message}</p>
             </div>
           )}
+
           {status === 'error' && (
             <div className="text-center space-y-4">
               <div className="text-destructive text-lg">✗</div>
@@ -81,6 +87,7 @@ export default function VerifyEmailPage() {
             </div>
           )}
         </CardContent>
+
         <CardFooter className="flex flex-col space-y-2">
           {status === 'success' && (
             <div className="space-y-2 w-full">
@@ -91,11 +98,13 @@ export default function VerifyEmailPage() {
               >
                 Go to Login
               </Button>
+
               <p className="text-xs text-center text-muted-foreground">
                 Your email has been verified. You can now sign in to your account.
               </p>
             </div>
           )}
+
           {status === 'error' && (
             <>
               <Button
@@ -106,6 +115,7 @@ export default function VerifyEmailPage() {
               >
                 Back to Login
               </Button>
+
               <Link href="/register" className="text-sm text-primary hover:underline">
                 Create a new account
               </Link>
@@ -117,3 +127,16 @@ export default function VerifyEmailPage() {
   );
 }
 
+export default function VerifyEmailPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <p className="text-muted-foreground">Loading email verification...</p>
+        </div>
+      }
+    >
+      <VerifyEmailContent />
+    </Suspense>
+  );
+            }
