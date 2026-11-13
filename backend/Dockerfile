@@ -1,7 +1,7 @@
 
 FROM php:8.3-apache
 
-# Install system dependencies and PHP extension libraries
+# Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     unzip \
     git \
@@ -31,12 +31,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Set Laravel working directory
+# Set application directory
 WORKDIR /var/www/html
 
-# Install PHP dependencies
-COPY composer.json composer.lock ./
+# Copy the Laravel application FIRST
+COPY . .
 
+# Install PHP dependencies after artisan is available
 RUN composer install \
     --no-dev \
     --no-interaction \
@@ -44,10 +45,7 @@ RUN composer install \
     --optimize-autoloader \
     --no-progress
 
-# Copy Laravel application
-COPY . .
-
-# Configure Apache to serve Laravel's public directory
+# Configure Apache to serve Laravel public directory
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 
 RUN sed -ri 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
@@ -57,7 +55,7 @@ RUN sed -ri 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
     && sed -ri 's/AllowOverride None/AllowOverride All/g' \
     /etc/apache2/apache2.conf
 
-# Create Laravel storage directories and set permissions
+# Create required Laravel directories
 RUN mkdir -p \
     storage/framework/cache \
     storage/framework/sessions \
